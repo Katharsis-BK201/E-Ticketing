@@ -1,62 +1,21 @@
 <?php
 session_start();
-include('C:/xampp/htdocs/e-ticket/config.php'); // Include the config to connect to the database
+include('C:/xampp/htdocs/e-ticket/config.php'); // Ensure the correct path
 
 // Check if the admin is logged in
 if (!isset($_SESSION['admin_id'])) {
     header("Location: admin_login.php");
     exit();
 }
-
-// Function to log admin actions
-function logAdminAction($admin_id, $action, $target_id) {
-    global $conn;
-    
-    // Prepare and execute the log insert query
-    $stmt = $conn->prepare("INSERT INTO Admin_Actions_Log (admin_id, action, target_id) VALUES (?, ?, ?)");
-    $stmt->bind_param("isi", $admin_id, $action, $target_id);
-    if ($stmt->execute()) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-// Example usage: Logging when an admin adds a new ferry
-if (isset($_POST['add_ferry'])) {
-    $ferry_name = $_POST['ferry_name'];
-    $departure_port = $_POST['departure_port'];
-    $arrival_port = $_POST['arrival_port'];
-    $status = $_POST['status'];
-    $departure_time = $_POST['departure_time'];
-    $arrival_time = $_POST['arrival_time'];
-
-    // Insert ferry into the database
-    $stmt = $conn->prepare("INSERT INTO ferries (ferry_name, departure_port, arrival_port, departure_time, arrival_time, status) VALUES (?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("ssssss", $ferry_name, $departure_port, $arrival_port, $departure_time, $arrival_time, $status);
-    if ($stmt->execute()) {
-        // Log the admin action
-        $ferry_id = $conn->insert_id;
-        logAdminAction($_SESSION['admin_id'], 'add new ferry', $ferry_id);
-        $success_message = "Ferry added successfully.";
-    } else {
-        $error_message = "Error adding ferry: " . $stmt->error;
-    }
-    $stmt->close();
-}
-
-// Example: Fetching logs for display
-$logs = $conn->query("SELECT * FROM Admin_Actions_Log ORDER BY timestamp DESC");
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Activity Logs</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manage Ferries</title>
+<link rel="stylesheet" href="C:/xampp/htdocs/e-ticket/style.css">
+<style>
 /* General Body Styling */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -252,10 +211,9 @@ table tbody tr:hover {
 
 
 </style>
-</style>
 </head>
 <body>
-<br><br>
+    <br><br>
 <div class="menu">
         <a href="manage_users.php">Manage Users</a>
         <a href="view_reservation.php">View Bookings</a>
@@ -272,58 +230,14 @@ table tbody tr:hover {
         }
     }
 </script>
-    <div class="container">
-        <h2>Admin Activity Logs</h2>
-        
-        <!-- Display success or error message -->
-        <?php if (isset($success_message)): ?>
-            <p class="success-message"><?php echo $success_message; ?></p>
-        <?php endif; ?>
-        <?php if (isset($error_message)): ?>
-            <p class="error-message"><?php echo $error_message; ?></p>
-        <?php endif; ?>
-        <input type="text" id="logSearch" onkeyup="searchLogs()" placeholder="Search for actions..">
-        <table class="log-table">
-            <thead>
-                <tr>
-                    <th>Admin ID</th>
-                    <th>Action</th>
-                    <th>Target ID</th>
-                    <th>Timestamp</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php while ($row = $logs->fetch_assoc()): ?>
-                    <tr>
-                        <td><?php echo $row['admin_id']; ?></td>
-                        <td><?php echo $row['action']; ?></td>
-                        <td><?php echo $row['target_id']; ?></td>
-                        <td><?php echo $row['timestamp']; ?></td>
-                    </tr>
-                <?php endwhile; ?>
-            </tbody>
-        </table>
-    </div>
+<div class="container">
+    <h2>Manage Ferries</h2>
+
+    <?php if (isset($success_message)): ?>
+        <p class="success-message"><?php echo htmlspecialchars($success_message); ?></p>
+    <?php endif; ?>
+    <?php if (isset($error_message)): ?>
+        <p class="error-message"><?php echo htmlspecialchars($error_message); ?></p>
+    <?php endif; ?>
 </body>
 </html>
-<script>
-    function searchLogs() {
-        var input, filter, table, tr, td, i, txtValue;
-        input = document.getElementById("logSearch");
-        filter = input.value.toUpperCase();
-        table = document.getElementById("logTable");
-        tr = table.getElementsByTagName("tr");
-
-        for (i = 1; i < tr.length; i++) {
-            td = tr[i].getElementsByTagName("td")[1]; // Search in the "Action" column
-            if (td) {
-                txtValue = td.textContent || td.innerText;
-                if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                    tr[i].style.display = "";
-                } else {
-                    tr[i].style.display = "none";
-                }
-            }
-        }
-    }
-</script>

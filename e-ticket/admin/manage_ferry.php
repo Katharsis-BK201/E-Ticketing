@@ -57,7 +57,7 @@ if (isset($_POST['add_ferry'])) {
 //Admin Log
 function logAddAccommodation($admin_id, $action, $target_id) {
     global $conn;
-    $action = 'add accomodation aype';
+    $action = 'add accomodation type';
     // Prepare and execute the log insert query
     $stmt = $conn->prepare("INSERT INTO Admin_Actions_Log (admin_id, action, target_id) VALUES (?, ?, ?)");
     $stmt->bind_param("isi", $admin_id, $action, $target_id);
@@ -70,7 +70,7 @@ function logAddAccommodation($admin_id, $action, $target_id) {
 //Admin Log
 function logAddAccommodationPrice($admin_id, $action, $target_id) {
     global $conn;
-    $action = 'add new ferry';
+    $action = 'add new Accommodation Price';
     // Prepare and execute the log insert query
     $stmt = $conn->prepare("INSERT INTO Admin_Actions_Log (admin_id, action, target_id) VALUES (?, ?, ?)");
     $stmt->bind_param("isi", $admin_id, $action, $target_id);
@@ -83,11 +83,11 @@ function logAddAccommodationPrice($admin_id, $action, $target_id) {
 
 // Handle form submission for adding accommodation and price
 if (isset($_POST['add_accommodation'])) {
-    $ferry_name = $_POST['ferry_name']; // Fetching ferry name from the dropdown
+    $ferry_name = $_POST['ferry_name'];
     $accom_type = $_POST['accom_type'];
     $price = $_POST['price'];
 
-    // 1. Retrieve ferry_id based on the ferry name
+    // 1. Retrieve ferry_id
     $stmt = $conn->prepare("SELECT ferry_id FROM ferries WHERE ferry_name = ?");
     $stmt->bind_param("s", $ferry_name);
     $stmt->execute();
@@ -95,7 +95,6 @@ if (isset($_POST['add_accommodation'])) {
     $stmt->fetch();
     $stmt->close();
 
-    // Check if ferry_id was retrieved successfully
     if (!$ferry_id) {
         $error_message = "Ferry not found.";
     } else {
@@ -103,25 +102,38 @@ if (isset($_POST['add_accommodation'])) {
         $stmt = $conn->prepare("INSERT INTO accommodation (accom_type) VALUES (?) ON DUPLICATE KEY UPDATE accom_type = accom_type");
         $stmt->bind_param("s", $accom_type);
         $stmt->execute();
-        logAddAccommodation($_SESSION['admin_id'], 'add new ferry', $ferry_id);
-        // Get the accommodation ID (accom_id)
-        $accom_id = $conn->insert_id;
-
-        // 3. Insert price for the accommodation linked to the specific ferry
-        $stmt = $conn->prepare("INSERT INTO accommodation_prices (ferry_id, accom_id, price) VALUES (?, ?, ?)");
-        $stmt->bind_param("iid", $ferry_id, $accom_id, $price);
-        logAddAccommodationPrice($_SESSION['admin_id'], 'add new ferry', $ferry_id);
-        if ($stmt->execute()) {
-            $success_message = "Accommodation and price added successfully.";
-        } else {
-            $error_message = "Error adding accommodation: " . $stmt->error;
-        }
         $stmt->close();
+
+        // Retrieve accom_id
+        $stmt = $conn->prepare("SELECT accom_price_id FROM accommodation WHERE accom_type = ?");
+        $stmt->bind_param("s", $accom_type);
+        $stmt->execute();
+        $stmt->bind_result($accom_id);
+        $stmt->fetch();
+        $stmt->close();
+
+        if (!$accom_id) {
+            $error_message = "Accommodation type retrieval failed.";
+        } else {
+            // 3. Insert price for the accommodation linked to the specific ferry
+            $stmt = $conn->prepare("INSERT INTO accommodation_prices (ferry_id, accom_id, price) VALUES (?, ?, ?)");
+            $stmt->bind_param("iid", $ferry_id, $accom_id, $price);
+            
+            if ($stmt->execute()) {
+                $success_message = "Accommodation and price added successfully.";
+                logAddAccommodationPrice($_SESSION['admin_id'], 'add new Accomodation Price', $ferry_id);
+            } else {
+                $error_message = "Error adding accommodation: " . $stmt->error;
+            }
+            $stmt->close();
+        }
     }
 }
 
+
 // Fetch list of ferries for displaying in dropdown
 $ferries = $conn->query("SELECT ferry_id, ferry_name FROM ferries ORDER BY ferry_name");
+$accommodation_types = $conn->query("SELECT * FROM accommodation");
 
 $conn->close();
 ?>
@@ -133,125 +145,139 @@ $conn->close();
 <title>Manage Ferries</title>
 <link rel="stylesheet" href="C:/xampp/htdocs/e-ticket/style.css">
 <style>
-    /* General Body Styling */
+/* General Body Styling */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f2f5;
     margin: 0;
     padding: 0;
+    color: #333;
 }
 
+/* Container Styling */
 .container {
-    width: 80%;
+    width: 85%;
+    max-width: 900px;
     margin: 20px auto;
     padding: 20px;
-    background-color: white;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
 }
 
+/* Header Styling */
 h2 {
     text-align: center;
-    color: #343a40;
+    color: #4a4a4a;
     margin-bottom: 30px;
+    font-size: 28px;
+    letter-spacing: 1px;
 }
 
 h3 {
-    color: #495057;
-    margin-bottom: 15px;
+    color: #5c636a;
+    margin-bottom: 20px;
+    font-size: 22px;
 }
 
 /* Success and Error Messages */
 .success-message {
-    color: #28a745;
+    color: #155724;
     background-color: #d4edda;
-    padding: 10px;
-    border-radius: 5px;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #c3e6cb;
     text-align: center;
     margin-bottom: 20px;
 }
 
 .error-message {
-    color: #dc3545;
+    color: #721c24;
     background-color: #f8d7da;
-    padding: 10px;
-    border-radius: 5px;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #f5c6cb;
     text-align: center;
     margin-bottom: 20px;
 }
 
 /* Input Groups */
 .input-group {
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .input-group input,
 .input-group select {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
     box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+
+.input-group input:focus,
+.input-group select:focus {
+    border-color: #007bff;
+    outline: none;
 }
 
 .input-group select {
     cursor: pointer;
+    background-color: #fff;
 }
 
-/* Form Buttons */
+/* Button Styling */
 .btn {
     background-color: #007bff;
-    color: white;
-    padding: 12px 20px;
-    font-size: 16px;
+    color: #fff;
+    padding: 14px;
+    font-size: 18px;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
     width: 100%;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, transform 0.2s;
 }
 
 .btn:hover {
     background-color: #0056b3;
+    transform: scale(1.02);
 }
 
-/* Forms Styling */
+/* Form Styling */
 form {
-    background-color: #f2f2f2;
+    background-color: #f7f9fc;
     padding: 25px;
-    border-radius: 8px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-form h3 {
-    margin-top: 0;
-}
-
-form .input-group {
-    margin-bottom: 20px;
-}
-
-/* Table Styling for displaying ferries */
+/* Table Styling */
 table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 30px;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
 table th, table td {
-    padding: 12px;
-    border: 1px solid #ddd;
+    padding: 15px;
+    border: 1px solid #dee2e6;
     text-align: left;
+    font-size: 16px;
 }
 
 table th {
-    background-color: #f8f9fa;
-    color: #495057;
+    background-color: #e9ecef;
+    color: #343a40;
+    font-weight: bold;
 }
 
 table tbody tr:nth-child(even) {
-    background-color: #f1f1f1;
+    background-color: #f8f9fa;
 }
 
 table tbody tr:hover {
@@ -268,18 +294,71 @@ table tbody tr:hover {
     .input-group input,
     .input-group select {
         font-size: 14px;
-        padding: 8px;
+        padding: 10px;
     }
 
     .btn {
-        font-size: 14px;
-        padding: 10px;
+        font-size: 16px;
+        padding: 12px;
     }
 }
+
+/* Navigation Menu Styling */
+.menu {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+    gap: 15px;
+}
+
+.menu a,
+.btn-logout {
+    padding: 12px 20px;
+    background: #17a2b8;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 6px;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.menu a:hover,
+.btn-logout:hover {
+    background: #138496;
+}
+
+/* Logout Button Specific */
+.btn-logout {
+    background: #dc3545;
+}
+
+.btn-logout:hover {
+    background: #c82333;
+}
+
 
 </style>
 </head>
 <body>
+    <br><br>
+<div class="menu">
+        <a href="manage_users.php">Manage Users</a>
+        <a href="view_reservation.php">View Bookings</a>
+        <a href="manage_ferry.php">Manage Ferry Schedule</a>
+        <a href="reports.php">Reports</a>
+        <button onclick="logout()" class="btn-logout">Logout</button>
+    </div>
+</div>
+
+<script>
+    function logout() {
+        if (confirm("Are you sure you want to log out?")) {
+            window.location.href = 'admin_login.php';
+        }
+    }
+</script>
 <div class="container">
     <h2>Manage Ferries</h2>
 
@@ -325,6 +404,7 @@ table tbody tr:hover {
 <form method="POST" action="">
     <h3>Add Accommodation Type and Price</h3>
     <div class="input-group">
+        <label for="ferry_name">Ferry Name</label>
         <select name="ferry_name" required>
             <option value="">Select Ferry</option>
             <?php 
@@ -334,15 +414,29 @@ table tbody tr:hover {
             <?php endwhile; ?>
         </select>
     </div>
+
     <div class="input-group">
-        <input type="text" name="accom_type" placeholder="Accommodation Type (e.g., Standard, VIP)" required>
+        <label for="accom_type">Accommodation Type</label>
+        <select name="accom_type" required>
+            <option value="">Select Accommodation Type</option>
+            <?php 
+            // Fetching accommodation types for the dropdown
+            
+            while ($row = $accommodation_types->fetch_assoc()): ?>
+                <option value="<?php echo $row['accom_type']; ?>"><?php echo $row['accom_type']; ?></option>
+            <?php endwhile; ?>
+        </select>
     </div>
+
     <div class="input-group">
-        <input type="number" step="0.01" name="price" placeholder="Price" required>
+        <label for="price">Price</label>
+        <input type="number" step="0.01" name="price" placeholder="Enter Price" required>
     </div>
-    <button type="submit" name="add_accommodation" class="btn">Add Accommodation</button>
+
+    <div class="input-group">
+        <button type="submit" name="add_accommodation" class="btn">Add Accommodation</button>
+    </div>
 </form>
 
-</div>
 </body>
 </html>

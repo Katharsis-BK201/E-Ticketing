@@ -3,13 +3,13 @@ session_start();
 include ('C:/xampp/htdocs/e-ticket/config.php'); // Ensure the correct path to your config.php
 
 // Check if the admin is logged in
-if (!isset($_SESSION['admin_id'])) {
+if (!isset($_SESSION['login'])) {
     header("Location: admin_login.php");
     exit();
 }
 
 // Fetch admin information (optional)
-$admin_id = $_SESSION['admin_id'];
+$admin_id = $_SESSION['users'];
 $stmt = $conn->prepare("SELECT username FROM Users WHERE user_id = ?");
 $stmt->bind_param("i", $admin_id);
 $stmt->execute();
@@ -78,7 +78,7 @@ $stmt->close();
     
     <div class="menu">
         <a href="manage_users.php">Manage Users</a>
-        <a href="view_reservations.php">View Reservations</a>
+        <a href="view_reservation.php">View Bookings</a>
         <a href="manage_ferry.php">Manage Ferry Schedule</a>
         <a href="reports.php">Reports</a>
         <button onclick="logout()" class="btn-logout">Logout</button>
