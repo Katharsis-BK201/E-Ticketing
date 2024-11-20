@@ -7,6 +7,24 @@ if (!isset($_SESSION['admin_id'])) {
     header("Location: admin_login.php");
     exit();
 }
+// Fetch all bookings along with ferry schedule and cost details
+$query = "
+    SELECT 
+        username,
+        acc_type,
+        email,
+        phone_num,
+        created_at,
+        updated_at,
+        deleted_at
+    FROM 
+        users
+    WHERE
+        acc_type = 'customer'
+    ORDER BY 
+        user_id ASC";
+$result = $conn->query($query);
+?>
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -231,7 +249,7 @@ table tbody tr:hover {
     }
 </script>
 <div class="container">
-    <h2>Manage Ferries</h2>
+    <h2>Manage Users</h2>
 
     <?php if (isset($success_message)): ?>
         <p class="success-message"><?php echo htmlspecialchars($success_message); ?></p>
@@ -239,5 +257,37 @@ table tbody tr:hover {
     <?php if (isset($error_message)): ?>
         <p class="error-message"><?php echo htmlspecialchars($error_message); ?></p>
     <?php endif; ?>
+    <table>
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Phone Number</th>
+                    <th>Created At</th>
+                    <th>Updated At</th>
+                    <th>Deleted At</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php while ($row = $result->fetch_assoc()): ?>
+                    <tr>
+                        <td><?php echo $row['username']; ?></td>
+                        <td><?php echo $row['email']; ?></td>
+                        <td><?php echo $row['phone_num']; ?></td>
+                        <td><?php echo $row['created_at']; ?></td>
+                        <td><?php echo $row['updated_at']; ?></td>
+                        <td><?php echo $row['deleted_at']; ?></td>
+                        <td>
+                            <form method="post" style="display:inline-block;">
+                                <input type="hidden" name="user_id" value="<?php echo $row['user_id']; ?>">
+                                <button type="submit" name="action" value="confirm" class="btn-action btn-confirm">Confirm</button>
+                                <button type="submit" name="action" value="cancel" class="btn-action btn-cancel">Cancel</button>
+                            </form>
+                        </td>
+                    </tr>
+                <?php endwhile; ?>
+            </tbody>
+        </table>
+     </div>
 </body>
 </html>

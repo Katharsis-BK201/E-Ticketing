@@ -138,9 +138,9 @@ footer {
             <div class="dashboard-buttons">
                 <button onclick="window.location.href='schedule_and_rate.php'">Schedule and Rates</button>
                 <button onclick="window.location.href='book.php'">Book</button>
-                <button onclick="window.location.href='booking_history.php'">Booking History</button>
-                <button onclick="window.location.href='update_profile.php'">Update Profile</button>
-                <button onclick="window.location.href='change_password.php'">Change Password</button>
+                <button onclick="window.location.href='book_history.php'">Booking History</button>
+                <button onclick="window.location.href='update_pro.php'">Update Profile</button>
+                <button onclick="window.location.href='change_pass.php'">Change Password</button>
             </div>
         </div>
     </div>

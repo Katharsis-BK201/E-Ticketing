@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 19, 2024 at 09:54 AM
+-- Generation Time: Nov 20, 2024 at 02:36 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -41,9 +41,11 @@ INSERT INTO `accommodation` (`accom_price_id`, `accom_type`) VALUES
 (2, 'Tourist B (Aircon)'),
 (3, 'Economy A'),
 (4, 'Economy B'),
-(5, 'Tourist A (Aircon)'),
-(6, 'Economy A'),
-(7, 'Tourist A (Aircon)');
+(5, 'Tourist C (Aircon)'),
+(6, 'Economy C'),
+(7, 'Deck A'),
+(8, 'Deck B'),
+(9, 'Tourist');
 
 -- --------------------------------------------------------
 
@@ -63,9 +65,19 @@ CREATE TABLE `accommodation_prices` (
 
 INSERT INTO `accommodation_prices` (`ferry_id`, `accom_id`, `price`) VALUES
 (7001, 1, 550.00),
-(7003, 1, 550.00),
+(7001, 3, 420.00),
+(7001, 4, 400.00),
+(7001, 5, 500.00),
+(7002, 1, 550.00),
+(7002, 5, 500.00),
+(7002, 7, 420.00),
+(7002, 8, 400.00),
 (7003, 3, 650.00),
-(7004, 1, 600.00);
+(7003, 4, 550.00),
+(7003, 9, 700.00),
+(7004, 1, 450.00),
+(7004, 4, 350.00),
+(7004, 6, 370.00);
 
 -- --------------------------------------------------------
 
@@ -100,7 +112,21 @@ INSERT INTO `admin_actions_log` (`log_id`, `admin_id`, `action`, `target_id`, `t
 (12, 20240001, '', 7003, '2024-11-19 05:25:37'),
 (13, 20240001, '', 7003, '2024-11-19 05:49:12'),
 (14, 20240001, 'add new ferry', 7004, '2024-11-19 06:30:48'),
-(15, 20240001, '', 7004, '2024-11-19 06:33:03');
+(15, 20240001, '', 7004, '2024-11-19 06:33:03'),
+(16, 20240001, '', 7001, '2024-11-19 14:40:26'),
+(17, 20240001, '', 7001, '2024-11-19 14:40:41'),
+(18, 20240001, '', 7001, '2024-11-19 14:40:54'),
+(19, 20240001, '', 7001, '2024-11-19 14:41:08'),
+(20, 20240001, '', 7002, '2024-11-19 14:41:24'),
+(21, 20240001, '', 7002, '2024-11-19 14:41:40'),
+(22, 20240001, '', 7002, '2024-11-19 14:41:54'),
+(23, 20240001, '', 7002, '2024-11-19 14:42:03'),
+(24, 20240001, '', 7004, '2024-11-19 14:42:15'),
+(25, 20240001, '', 7004, '2024-11-19 14:42:28'),
+(26, 20240001, '', 7004, '2024-11-19 14:42:39'),
+(27, 20240001, '', 7003, '2024-11-19 14:45:50'),
+(28, 20240001, '', 7003, '2024-11-19 14:46:00'),
+(29, 20240001, '', 7003, '2024-11-19 14:46:12');
 
 -- --------------------------------------------------------
 
@@ -112,25 +138,22 @@ CREATE TABLE `bookings` (
   `booking_id` int(11) NOT NULL,
   `fk_user_id` int(11) NOT NULL,
   `fk_ferry_id` int(11) NOT NULL,
-  `booking_date` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `status` enum('confirmed','cancelled','pending') NOT NULL,
+  `first_name` varchar(45) NOT NULL,
+  `middle_name` varchar(45) NOT NULL,
+  `last_name` varchar(45) NOT NULL,
+  `gender` varchar(45) NOT NULL,
+  `birth_date` date NOT NULL,
+  `civil_status` varchar(45) NOT NULL,
+  `nationality` varchar(45) NOT NULL,
+  `address` varchar(45) NOT NULL,
+  `passenger_type` enum('regular','student','senior','pwd','child','infant') NOT NULL,
   `sub_price` decimal(10,2) NOT NULL,
-  `discount_type` enum('regular','student','senior','pwd') NOT NULL,
+  `valid_id` varchar(255) NOT NULL,
   `discount` decimal(10,2) NOT NULL,
-  `total_cost` decimal(10,2) NOT NULL
+  `total_cost` decimal(10,2) NOT NULL,
+  `booking_date` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `status` enum('confirmed','cancelled','pending') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
---
--- Dumping data for table `bookings`
---
-
-INSERT INTO `bookings` (`booking_id`, `fk_user_id`, `fk_ferry_id`, `booking_date`, `status`, `sub_price`, `discount_type`, `discount`, `total_cost`) VALUES
-(1, 20240005, 7001, '2024-11-18 18:05:46', 'confirmed', 550.00, 'student', 110.00, 440.00),
-(2, 20240005, 7001, '2024-11-18 17:20:54', 'cancelled', 1100.00, 'student', 220.00, 880.00),
-(3, 20240005, 7001, '2024-11-18 17:14:08', 'confirmed', 1100.00, 'student', 220.00, 880.00),
-(4, 20240005, 7001, '2024-11-18 17:13:20', 'confirmed', 1100.00, 'student', 220.00, 880.00),
-(5, 20240005, 7003, '2024-11-19 06:26:02', 'pending', 550.00, 'student', 110.00, 440.00),
-(6, 20240005, 7004, '2024-11-19 06:37:00', 'pending', 600.00, 'regular', 0.00, 600.00);
 
 -- --------------------------------------------------------
 
@@ -162,10 +185,10 @@ CREATE TABLE `ferries` (
 --
 
 INSERT INTO `ferries` (`ferry_id`, `ferry_name`) VALUES
-(7001, 'MV GLORIA FIVE(RORO)'),
+(7001, 'MV GLORIA FIVE'),
 (7002, 'MV GLORIA THREE'),
 (7003, 'MV GLORIA G-1'),
-(7004, 'G5');
+(7004, 'MV GLORIA TWO');
 
 -- --------------------------------------------------------
 
@@ -332,13 +355,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `accommodation`
 --
 ALTER TABLE `accommodation`
-  MODIFY `accom_price_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `accom_price_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `admin_actions_log`
 --
 ALTER TABLE `admin_actions_log`
-  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT for table `bookings`

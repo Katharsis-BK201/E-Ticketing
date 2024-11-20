@@ -3,13 +3,13 @@ session_start();
 include ('C:/xampp/htdocs/e-ticket/config.php'); // Ensure the correct path to your config.php
 
 // Check if the admin is logged in
-if (!isset($_SESSION['login'])) {
+if (!isset($_SESSION['admin_id'])) {
     header("Location: admin_login.php");
     exit();
 }
 
 // Fetch admin information (optional)
-$admin_id = $_SESSION['users'];
+$admin_id = $_SESSION['admin_id'];
 $stmt = $conn->prepare("SELECT username FROM Users WHERE user_id = ?");
 $stmt->bind_param("i", $admin_id);
 $stmt->execute();

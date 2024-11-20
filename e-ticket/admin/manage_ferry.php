@@ -98,12 +98,6 @@ if (isset($_POST['add_accommodation'])) {
     if (!$ferry_id) {
         $error_message = "Ferry not found.";
     } else {
-        // 2. Insert new accommodation type if it doesn't exist
-        $stmt = $conn->prepare("INSERT INTO accommodation (accom_type) VALUES (?) ON DUPLICATE KEY UPDATE accom_type = accom_type");
-        $stmt->bind_param("s", $accom_type);
-        $stmt->execute();
-        $stmt->close();
-
         // Retrieve accom_id
         $stmt = $conn->prepare("SELECT accom_price_id FROM accommodation WHERE accom_type = ?");
         $stmt->bind_param("s", $accom_type);
