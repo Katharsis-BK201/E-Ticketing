@@ -32,7 +32,7 @@ $stmt->close();
         padding: 20px;
     }
     .dashboard-container {
-        max-width: 800px;
+        max-width: 1000px;
         margin: 0 auto;
         background: #fff;
         padding: 20px;
@@ -79,7 +79,7 @@ $stmt->close();
     <div class="menu">
         <a href="manage_users.php">Manage Users</a>
         <a href="view_reservation.php">View Bookings</a>
-        <a href="manage_ferry.php">Manage Ferry Schedule</a>
+        <a href="view_ferries.php">View Ferries</a>
         <a href="reports.php">Reports</a>
         <button onclick="logout()" class="btn-logout">Logout</button>
     </div>

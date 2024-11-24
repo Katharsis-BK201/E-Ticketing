@@ -10,6 +10,7 @@ if (!isset($_SESSION['admin_id'])) {
 // Fetch all bookings along with ferry schedule and cost details
 $query = "
     SELECT 
+        user_id,
         username,
         acc_type,
         email,
@@ -235,7 +236,7 @@ table tbody tr:hover {
 <div class="menu">
         <a href="manage_users.php">Manage Users</a>
         <a href="view_reservation.php">View Bookings</a>
-        <a href="manage_ferry.php">Manage Ferry Schedule</a>
+        <a href="view_ferries.php">View Ferries</a>
         <a href="reports.php">Reports</a>
         <button onclick="logout()" class="btn-logout">Logout</button>
     </div>
@@ -280,8 +281,7 @@ table tbody tr:hover {
                         <td>
                             <form method="post" style="display:inline-block;">
                                 <input type="hidden" name="user_id" value="<?php echo $row['user_id']; ?>">
-                                <button type="submit" name="action" value="confirm" class="btn-action btn-confirm">Confirm</button>
-                                <button type="submit" name="action" value="cancel" class="btn-action btn-cancel">Cancel</button>
+                               
                             </form>
                         </td>
                     </tr>

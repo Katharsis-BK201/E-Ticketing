@@ -45,7 +45,7 @@ $query = "
         b.booking_date, 
         b.status, 
         b.sub_price, 
-        b.discount_type, 
+        b.passenger_type, 
         b.total_cost, 
         fs.departure_time, 
         fs.arrival_time 
@@ -171,9 +171,9 @@ table th {
 <body>
     <br><br>
     <div class="menu">
-        <a href="manage_users.php">Manage Users</a>
+    <a href="manage_users.php">Manage Users</a>
         <a href="view_reservation.php">View Bookings</a>
-        <a href="manage_ferry.php">Manage Ferry Schedule</a>
+        <a href="view_ferries.php">View Ferries</a>
         <a href="reports.php">Reports</a>
         <button onclick="logout()" class="btn-logout">Logout</button>
     </div>
@@ -205,7 +205,7 @@ table th {
                     <th>Departure</th>
                     <th>Arrival</th>
                     <th>Subtotal</th>
-                    <th>Discount Type</th>
+                    <th>Passenger Type</th>
                     <th>Total Cost</th>
                     <th>Status</th>
                     <th>Actions</th>
@@ -221,7 +221,7 @@ table th {
                         <td><?php echo $row['departure_time']; ?></td>
                         <td><?php echo $row['arrival_time']; ?></td>
                         <td><?php echo $row['sub_price']; ?></td>
-                        <td><?php echo $row['discount_type']; ?></td>
+                        <td><?php echo $row['passenger_type']; ?></td>
                         <td><?php echo $row['total_cost']; ?></td>
                         <td><?php echo $row['status']; ?></td>
                         <td>
