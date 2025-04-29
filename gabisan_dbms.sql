@@ -51,7 +51,7 @@ INSERT INTO `accommodation` (`accom_price_id`, `accom_type`) VALUES
 
 --
 -- Table structure for table `accommodation_prices`
---
+-- ASFASDFAWEFAWEFA WEFAWE
 
 CREATE TABLE `accommodation_prices` (
   `ferry_id` int(11) NOT NULL,
